@@ -67,7 +67,7 @@
             <th>Ответ на комментарйи</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody v-if="random_result.length > 0">
           <tr v-for="res in random_result" :key="res" class="file_arq" :style="random_result.includes(res) ? 'background-color: #a0ffa4;' : ''">
             <td><a :href="'https://dtf.ru/' + postId + '?comment=' + comment_list[res].commentId" target="_blank">{{ res }}</a></td>
             <td><a :href="'https://dtf.ru/u/' + comment_list[res].authorId" target="_blank">{{ comment_list[res].authorName }}</a></td>
@@ -89,7 +89,7 @@
             <th>Ответ на комментарйи</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody v-if="random_result.length > 0">
           <tr v-for="(comment, id) in comment_list" :key="id" class="file_arq" :style="random_result.includes(id) ? 'background-color: #a0ffa4;' : ''">
             <td><a :href="'https://dtf.ru/' + postId + '?comment=' + comment.commentId" target="_blank">{{ id }}</a></td>
             <td><a :href="'https://dtf.ru/u/' + comment.authorId" target="_blank">{{ comment.authorName }}</a></td>
@@ -139,24 +139,26 @@ export default {
         .then((response) => {
           const comments = response.data.result;
           this.totalComments = comments.length;
+          const user_list = [];
 
-          comments.map((value) => {
+          comments.forEach((value) => {
             // Проверка на замороженный аккаунт
             if (this.nonFreeze && value.author.name == 'Аккаунт заморожен') {
-              return false;
+              return;
             }
 
             // Проверка на ответы
             if (this.onlyMainComment && value.replyTo !== 0) {
-              return false;
+              return;
             }
 
             // Проверка на медиа
             if (this.withMedia && value.media.length == 0) {
-              return false;
+              return;
             }
 
-            if (value.text.includes(this.searchWord)) {
+            const commentText = value.text.toLowerCase();
+            if (commentText.includes(this.searchWord.toLowerCase())) {
               this.neededComments += 1;
               const comment = {
                 'authorName': value.author.name,
@@ -166,9 +168,15 @@ export default {
                 'answered': value.replyTo == 0 ? false : true,
               };
 
-              this.comment_list.push(comment);
+              if (user_list.includes( value.author.id)) {
+                user_list.splice(user_list.indexOf( value.author.id), 1);
+                user_list.push(value.author.id);
+              } else {
+                user_list.push(value.author.id);
+                this.comment_list.push(comment);
+              }
             }
-          }).filter(Boolean);
+          });
 
           for (let step = 0; step < this.prizeCount; step++) {
             const rnd = this.getRandomInt(this.totalComments);
