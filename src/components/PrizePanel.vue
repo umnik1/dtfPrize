@@ -43,6 +43,19 @@
             <input v-model="withMedia" type="checkbox"> Должно быть вложение <i>(например картинка)</i>
           </label>
         </div>
+        <div class="checkbox">
+          <label>
+            <input v-model="withLike" type="checkbox"> Должен быть лайк посту
+          </label>
+        </div>
+        <p v-if="withLike">
+          <b>Перейдите по ссылке</b>
+            <a :href="'https://dtf.ru/vote/get_likers?id=' + getPostId() + '&type=1&mode=raw'" target="_blank">
+              https://dtf.ru/vote/get_likers
+            </a>
+          и скопируйте содержимое, после этого вставьте весь текст в поле ниже:<br>
+          <textarea v-model="likers" id="likers"></textarea>
+        </p>
       </div>
      
       <div class="form-actions">
@@ -69,7 +82,7 @@
         </thead>
         <tbody v-if="random_result.length > 0">
           <tr v-for="res in random_result" :key="res" class="file_arq" :style="random_result.includes(res) ? 'background-color: #a0ffa4;' : ''">
-            <td><a :href="'https://dtf.ru/' + postId + '?comment=' + comment_list[res].commentId" target="_blank">{{ res }}</a></td>
+            <td><a v-if="comment_list[res].commentId" :href="'https://dtf.ru/' + postId + '?comment=' + comment_list[res].commentId" target="_blank">{{ res }}</a></td>
             <td><a :href="'https://dtf.ru/u/' + comment_list[res].authorId" target="_blank">{{ comment_list[res].authorName }}</a></td>
             <td>{{ comment_list[res].text }}</td>
             <td v-if="comment_list[res].answered == true">Да</td>
@@ -118,10 +131,12 @@ export default {
       onlyMainComment: false,
       nonFreeze: false,
       withMedia: false,
+      withLike: false,
       comment_list: [],
       totalComments: 0,
       neededComments: 0,
       random_result: [],
+      likers: '',
     }
   },
   methods:{
@@ -133,13 +148,23 @@ export default {
       this.random_result = [];
 
       if (this.postLink) {
-        this.postId = this.postLink.split( '/' )[5].split( '-' )[0];
+        this.postId = this.getPostId();
 
         axios.get('https://api.dtf.ru/v1.8/entry/'+ this.postId +'/comments/popular')
         .then((response) => {
           const comments = response.data.result;
           this.totalComments = comments.length;
           const user_list = [];
+          const postLikes = [];
+
+          if (this.likers !== '') {
+          const likes = JSON.parse(this.likers).data.likers;
+            Object.keys(likes).forEach((key) => {
+              if (likes[key].sign == 1) {
+                postLikes.push(parseInt(key));
+              }
+            });
+          }
 
           comments.forEach((value) => {
             // Проверка на замороженный аккаунт
@@ -155,6 +180,12 @@ export default {
             // Проверка на медиа
             if (this.withMedia && value.media.length == 0) {
               return;
+            }
+
+            if (this.withLike) {
+              if (!postLikes.includes(value.author.id)) {
+                return;
+              }
             }
 
             const commentText = value.text.toLowerCase();
@@ -192,6 +223,13 @@ export default {
         alert('Вставьте ссылку на пост');
       }
     },
+    getPostId() {
+      if (this.postLink.split( '/' )[5]) {
+          return  this.postLink.split( '/' )[5].split( '-' )[0];
+        } else {
+          return this.postLink.split( '/' )[4].split( '-' )[0];
+        }
+    },
     getRandomInt(max) {
       return Math.floor(Math.random() * max);
     },
@@ -218,5 +256,12 @@ export default {
 
 #desc {
   margin-left: 10px;
+}
+
+#likers {
+  width: 100%;
+  height: 120px;
+  margin-top: 20px;
+  border-color: #dddddd;
 }
 </style>
