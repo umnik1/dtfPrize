@@ -69,29 +69,30 @@
         <b>Всего комментариев:</b> {{ totalComments }} | <b>Подошло под настройки: </b> {{ neededComments }}
       </p>
       
-      <hr v-if="random_result.length > 0">
-      <h4 v-if="random_result.length > 0" id="desc">Победители</h4>
-      <table v-if="random_result.length > 0" class="table-striped">
-        <thead>
-          <tr>
-            <th>id</th>
-            <th>Пользователь</th>
-            <th>Комментарий</th>
-            <th>Ответ на комментарйи</th>
-          </tr>
-        </thead>
-        <tbody v-if="random_result.length > 0">
-          <tr v-for="res in random_result" :key="res" class="file_arq" :style="random_result.includes(res) ? 'background-color: #a0ffa4;' : ''">
-            <td><a v-if="comment_list[res].commentId" :href="'https://dtf.ru/' + postId + '?comment=' + comment_list[res].commentId" target="_blank">{{ res }}</a></td>
-            <td><a :href="'https://dtf.ru/u/' + comment_list[res].authorId" target="_blank">{{ comment_list[res].authorName }}</a></td>
-            <td>{{ comment_list[res].text }}</td>
-            <td v-if="comment_list[res].answered == true">Да</td>
-            <td v-else>Нет</td>
-          </tr>
-        </tbody>
-      </table>
-      <hr>
-
+      <div v-if="end">
+        <hr>
+        <h4 id="desc">Победители</h4>
+        <table class="table-striped">
+          <thead>
+            <tr>
+              <th>id</th>
+              <th>Пользователь</th>
+              <th>Комментарий</th>
+              <th>Ответ на комментарйи</th>
+            </tr>
+          </thead>
+          <tbody v-if="end">
+            <tr v-for="res in random_result" :key="res" class="file_arq" :style="random_result.includes(res) ? 'background-color: #a0ffa4;' : ''">
+              <td><a v-if="comment_list[res].commentId" :href="'https://dtf.ru/' + postId + '?comment=' + comment_list[res].commentId" target="_blank">{{ res }}</a></td>
+              <td><a :href="'https://dtf.ru/u/' + comment_list[res].authorId" target="_blank">{{ comment_list[res].authorName }}</a></td>
+              <td><a :href="'https://dtf.ru/' + postId + '?comment=' + comment_list[res].commentId" target="_blank">{{ comment_list[res].text }}</a></td>
+              <td v-if="comment_list[res].answered == true">Да</td>
+              <td v-else>Нет</td>
+            </tr>
+          </tbody>
+        </table>
+        <hr>
+      </div>
       <h4 id="desc">Подходящие комментарии</h4>
       <table class="table-striped">
         <thead>
@@ -137,6 +138,7 @@ export default {
       neededComments: 0,
       random_result: [],
       likers: '',
+      end: false,
     }
   },
   methods:{
@@ -146,6 +148,7 @@ export default {
       this.totalComments = 0;
       this.neededComments = 0;
       this.random_result = [];
+      this.end = false;
 
       if (this.postLink) {
         this.postId = this.getPostId();
@@ -153,6 +156,7 @@ export default {
         axios.get('https://api.dtf.ru/v1.8/entry/'+ this.postId +'/comments/popular')
         .then((response) => {
           const comments = response.data.result;
+          console.log(comments);
           this.totalComments = comments.length;
           const user_list = [];
           const postLikes = [];
@@ -190,7 +194,11 @@ export default {
 
             const commentText = value.text.toLowerCase();
             if (commentText.includes(this.searchWord.toLowerCase())) {
-              this.neededComments += 1;
+
+              if (value.author.id == -1) {
+                value.author.name = '[Скрытый пользователь]';
+              }
+
               const comment = {
                 'authorName': value.author.name,
                 'authorId': value.author.id,
@@ -203,6 +211,7 @@ export default {
                 user_list.splice(user_list.indexOf( value.author.id), 1);
                 user_list.push(value.author.id);
               } else {
+                this.neededComments += 1;
                 user_list.push(value.author.id);
                 this.comment_list.push(comment);
               }
@@ -210,10 +219,12 @@ export default {
           });
 
           for (let step = 0; step < this.prizeCount; step++) {
-            const rnd = this.getRandomInt(this.totalComments);
+            const rnd = this.getRandomInt(this.neededComments);
             if (!this.random_result.includes(rnd)) {
               this.random_result.push(rnd);
             }
+
+            this.end = true;
           }
         })
         .catch(function () {
