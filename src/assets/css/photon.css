@@ -2352,3 +2352,10 @@ td:last-child {
   flex: none;
   padding: 3px 10px;
 }
+
+@media only screen and (max-width: 767px) {
+  .pane-sm {
+    max-width: 50px;
+    min-width: 50px;
+  }
+}

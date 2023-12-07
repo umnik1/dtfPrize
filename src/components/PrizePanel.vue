@@ -7,7 +7,7 @@
       </div>
       <div v-if="noWord == false" class="form-group">
         <label>Введите слово, которое будем искать</label>
-        <input v-model="searchWord" type="text" class="form-control" placeholder="Например: Учавствую">
+        <input v-model="searchWord" type="text" class="form-control" placeholder="Например: Участвую">
       </div>
       <div class="checkbox">
         <label>
@@ -121,7 +121,7 @@
 import axios from 'axios';
 
 export default {
-  name: 'HelloWorld',
+  name: 'PrizePanel',
   data(){
     return{
       postId: 0,
@@ -153,14 +153,12 @@ export default {
       if (this.postLink) {
         this.postId = this.getPostId();
 
-        axios.get('https://api.dtf.ru/v1.8/entry/'+ this.postId +'/comments/popular')
+        axios.get('https://api.dtf.ru/v2.31/comments?contentId='+ this.postId +'&sorting=date')
         .then((response) => {
-          const comments = response.data.result;
-          console.log(comments);
+          const comments = response.data.result.items;
           this.totalComments = comments.length;
           const user_list = [];
           const postLikes = [];
-
           if (this.likers !== '') {
           const likes = JSON.parse(this.likers).data.likers;
             Object.keys(likes).forEach((key) => {

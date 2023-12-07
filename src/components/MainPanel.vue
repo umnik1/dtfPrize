@@ -14,15 +14,11 @@
         <h5 class="nav-group-title">Меню</h5>
         <span @click="ChangeComponent('StatisticPanel', 0)" :class="tab == 0 ? 'nav-group-item active' : 'nav-group-item'">
           <span class="icon icon-chart-bar"></span>
-          Статистика
+          Итоги 2023
         </span>
         <span @click="ChangeComponent('PrizePanel', 1)" :class="tab == 1 ? 'nav-group-item active' : 'nav-group-item'">
           <span class="icon icon-shuffle"></span>
           Розыгрыш
-        </span>
-        <span @click="ChangeComponent('FavouritePanel', 2)" :class="tab == 2 ? 'nav-group-item active' : 'nav-group-item'">
-          <span class="icon icon-archive"></span>
-          Парсер закладок
         </span>
       </nav>
     </div>
@@ -38,10 +34,9 @@
 <script>
 import StatisticPanel from './StatisticPanel.vue'
 import PrizePanel from './PrizePanel.vue'
-import FavouritePanel from './FavouritePanel.vue'
 
 export default {
-  name: 'HelloWorld',
+  name: 'MainPanel',
   data(){
     return{
       tab: 0,
@@ -51,7 +46,6 @@ export default {
   components: {
     StatisticPanel,
     PrizePanel,
-    FavouritePanel,
   },
   methods:{
     ChangeComponent(NewComponent, num){
