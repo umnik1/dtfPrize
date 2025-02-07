@@ -1,12 +1,24 @@
-### DTFPrize
+# dtf_prize2
 
-Позволяет определять победителя из комментарев. Помогает в розыгрышах.
+## Project setup
+```
+npm install
+```
 
-**Особенности:**
-- Возможность делать ывборку по определённому слову или без него;
-- Выбор кол-ва победителей;
-- Не учитывать в поиске ответы на комментарии;
-- Удаляет из поиска замороженные аккаунты;
-- Выборка по комментарям у которых есть вложение;
+### Compiles and hot-reloads for development
+```
+npm run serve
+```
 
-**Сайт:** https://dtfpass.ru/
+### Compiles and minifies for production
+```
+npm run build
+```
+
+### Lints and fixes files
+```
+npm run lint
+```
+
+### Customize configuration
+See [Configuration Reference](https://cli.vuejs.org/config/).
