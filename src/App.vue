@@ -16,16 +16,7 @@
       </div>
       <div class="form-group">
         <label>Сколько победителей</label>
-        <select v-model="prizeCount" class="form-control">
-          <option value="1">Один</option>
-          <option value="2">Два</option>
-          <option value="3">Три</option>
-          <option value="4">Четыре</option>
-          <option value="5">Пять</option>
-          <option value="6">Шесть</option>
-          <option value="7">Семь</option>
-          <option value="8">Восемь</option>
-        </select>
+        <input type="number" v-model="prizeCount" class="form-control"/>
       </div>
       <div id="settings">
         <div class="checkbox">
