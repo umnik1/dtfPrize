@@ -92,7 +92,7 @@ export default {
       }
     },
     handleSpinClick() {
-        this.angVel = this.rand(0.25, 0.45)
+        this.angVel = this.rand(0, 1)
         this.engine()
     }
   }
