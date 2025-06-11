@@ -63,7 +63,7 @@
             </div>
             <div class="col">
               <h4 id="desc">Победители</h4>
-              <small v-if="end">Шанс выйгрыша - {{ chance }}%</small>
+              <small v-if="end">Шанс выигрыша - {{ chance }}%</small>
                 <table class="table-striped">
                   <thead>
                     <tr>

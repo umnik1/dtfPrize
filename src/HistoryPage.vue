@@ -22,7 +22,7 @@
     <div>
       <div>
         <div class="row align-items-start" style="margin: 0;">
-              <h4 id="desc">Победители (Шанс выйгрыша - {{ chance }}%) </h4>
+              <h4 id="desc">Победители (Шанс выигрыша - {{ chance }}%) </h4>
                 <table class="table-striped">
                   <thead>
                     <tr>
