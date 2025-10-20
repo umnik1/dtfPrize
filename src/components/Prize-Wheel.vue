@@ -46,6 +46,7 @@ export default {
   },
   mounted() {
     this.ctx = this.$refs.wheelCanvas.getContext('2d')
+    this.engine = this.engine.bind(this)
     this.comments.forEach((sector, i) => this.drawSector(sector, i))
     this.rotate()
   },
@@ -67,9 +68,21 @@ export default {
       this.ctx.translate(this.rad, this.rad)
       this.ctx.rotate(angle + this.arc / 2)
       this.ctx.textAlign = 'right'
+      this.ctx.textBaseline = 'middle'
       this.ctx.fillStyle = '#fff'
-      this.ctx.font = 'bold 30px sans-serif'
-      this.ctx.fillText(sector.authorName, this.rad - 10, 10)
+      const outerPadding = 14 // px padding from the outer rim
+      const availableArcWidth = (this.rad - outerPadding) * this.arc
+      const baseFontSize = 30
+      const maxFontSize = 40
+      const minFontSize = 10
+      this.ctx.font = `bold ${baseFontSize}px sans-serif`
+      const text = sector.authorName
+      const measured = this.ctx.measureText(text).width || 1
+      let computedSize = Math.floor((availableArcWidth / measured) * baseFontSize)
+      if (!Number.isFinite(computedSize)) computedSize = baseFontSize
+      const fontSize = Math.max(minFontSize, Math.min(maxFontSize, computedSize))
+      this.ctx.font = `bold ${fontSize}px sans-serif`
+      this.ctx.fillText(text, this.rad - outerPadding, 0)
       this.ctx.restore()
     },
     rotate() {
@@ -111,7 +124,7 @@ export default {
 }
 
 canvas {
-  transition: transform 0.1s;
+  transition: none;
 }
 
 #wheelOfFortune {

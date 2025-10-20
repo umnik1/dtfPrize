@@ -16,7 +16,7 @@
       </div>
       <div class="form-group">
         <label>Сколько победителей</label>
-        <input type="number" v-model="prizeCount" class="form-control"/>
+        <input type="number" v-model.number="prizeCount" class="form-control"/>
       </div>
       <div id="settings">
         <div class="checkbox">
@@ -37,6 +37,11 @@
         <div class="checkbox">
           <label>
             <input v-model="withLike" type="checkbox"> Должен быть лайк посту (любая реакция)
+          </label>
+        </div>
+        <div class="checkbox">
+          <label>
+            <input v-model="allowRepeated" type="checkbox"> Разрешить повторные комментарии
           </label>
         </div>
       </div>
@@ -139,6 +144,7 @@ export default {
       nonFreeze: false,
       withMedia: false,
       withLike: false,
+      allowRepeated: false,
       comment_list: [],
       totalComments: 0,
       neededComments: 0,
@@ -163,6 +169,7 @@ export default {
       this.random_result = [];
       this.end = false;
       this.loading = true;
+      this.spinCalls = 0; // reset spin counter for a new round
 
       if (this.postLink) {
         this.postId = this.getPostId();
@@ -218,21 +225,26 @@ export default {
                 'color': '#' + randomValue.toString(16).padStart(6, '0')
               };
 
-              if (user_list.includes( value.author.id)) {
-                user_list.splice(user_list.indexOf( value.author.id), 1);
-                user_list.push(value.author.id);
-                this.repeatedComments += 1;
-              } else {
+              if (this.allowRepeated) {
                 this.neededComments += 1;
-                user_list.push(value.author.id);
                 this.comment_list.push(comment);
+              } else {
+                if (user_list.includes(value.author.id)) {
+                  user_list.splice(user_list.indexOf(value.author.id), 1);
+                  user_list.push(value.author.id);
+                  this.repeatedComments += 1;
+                } else {
+                  this.neededComments += 1;
+                  user_list.push(value.author.id);
+                  this.comment_list.push(comment);
+                }
               }
             }
           });
 
           this.end = true;
           this.loading = false;
-          this.chance = this.calculateChance(this.comment_list, this.prizeCount);
+          this.chance = this.calculateChance(this.comment_list, Number(this.prizeCount));
           setTimeout(() => {this.$refs.prizeWheel.handleSpinClick();}, 1000);
           this.spinCalls += 1;
         })
@@ -275,7 +287,8 @@ export default {
         this.$refs.prizeWheel.handleSpinClick();
       }
 
-      if (this.spinCalls < this.prizeCount) {
+      const targetSpins = Number(this.prizeCount) || 1;
+      if (this.spinCalls < targetSpins) {
         setTimeout(() => {
           this.$refs.prizeWheel.handleSpinClick();
           this.spinCalls += 1;
