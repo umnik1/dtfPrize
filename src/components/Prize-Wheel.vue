@@ -52,7 +52,15 @@ export default {
   },
   methods: {
     rand(m, M) {
-      return Math.random() * (M - m) + m
+      const range = M - m
+      if (range <= 0) return m
+      if (window.crypto && window.crypto.getRandomValues) {
+        const buf = new Uint32Array(1)
+        window.crypto.getRandomValues(buf)
+        const norm = buf[0] / 0x100000000
+        return m + norm * range
+      }
+      return m + Math.random() * range
     },
     drawSector(sector, i) {
       const angle = this.arc * i
@@ -105,7 +113,8 @@ export default {
       }
     },
     handleSpinClick() {
-        this.angVel = this.rand(0, 1)
+        this.ang = (this.ang + this.rand(0, this.TAU)) % this.TAU
+        this.angVel = this.rand(0.25, 1.5)
         this.engine()
     }
   }
